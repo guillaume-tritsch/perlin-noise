@@ -1,0 +1,140 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { MapGenerator } from "./newGeneration.mjs";
+
+var renderer;
+var camera;
+var scene;
+var controls;
+
+function start() {
+  scene = new THREE.Scene();
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    1,
+    10000
+  );
+
+  camera.position.set(10, 0, 0);
+
+  // CONTROLS
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.update();
+
+  // CUBE
+
+  let mapWidth = 6;
+  let mapHeight = 6;
+
+  let generat = new MapGenerator(
+    Math.round(Math.random() * 100),
+    7,
+    mapWidth,
+    mapHeight
+  );
+  var terrainData = generat.generateMatrice(0, 0);
+  var heigthCanvas = generat.generateImageFromMatrice(terrainData);
+  var textureCanvas = generat.generateTextureCanvas(terrainData);
+
+  var heightMap = new THREE.CanvasTexture(heigthCanvas);
+  var textureMap = new THREE.CanvasTexture(textureCanvas);
+  textureMap.minFilter = THREE.NearestFilter;
+  textureMap.magFilter = THREE.NearestFilter;
+
+  document.body.appendChild(heigthCanvas);
+  document.body.appendChild(textureCanvas);
+  var planeGeometry = new THREE.PlaneGeometry(
+    mapWidth * 2,
+    mapHeight * 2,
+    mapWidth,
+    mapHeight
+  );
+  var planeMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    displacementMap: heightMap,
+    displacementScale: 10,
+    wireframe: false,
+    flatShading: true,
+    map: textureMap,
+  });
+  const mesh = new THREE.Mesh(planeGeometry, planeMaterial);
+  mesh.rotation.x = Math.PI / 2;
+  scene.add(mesh);
+
+  const waterMaterial = new THREE.MeshPhongMaterial({
+    color: 0x0000ff,
+    side: THREE.DoubleSide,
+    wireframe: false,
+    flatShading: true,
+  });
+  const waterplaneGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+  const water = new THREE.Mesh(waterplaneGeometry, waterMaterial);
+  water.rotation.x = Math.PI / 2;
+  water.position.y = -80;
+  // scene.add(water);
+
+  // AUTRE
+
+  terrainData = generat.generateMatrice(6, 0);
+  heigthCanvas = generat.generateImageFromMatrice(terrainData);
+  textureCanvas = generat.generateTextureCanvas(terrainData);
+  heightMap = new THREE.CanvasTexture(heigthCanvas);
+  textureMap = new THREE.CanvasTexture(textureCanvas);
+  textureMap.minFilter = THREE.NearestFilter;
+  textureMap.magFilter = THREE.NearestFilter;
+
+  planeGeometry = new THREE.PlaneGeometry(
+    mapWidth * 2,
+    mapHeight * 2,
+    mapWidth,
+    mapHeight
+  );
+  planeMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    displacementMap: heightMap,
+    displacementScale: 10,
+    wireframe: false,
+    flatShading: true,
+    map: textureMap,
+  });
+  const meshf = new THREE.Mesh(planeGeometry, planeMaterial);
+  meshf.rotation.x = Math.PI / 2;
+  meshf.position.x = mapWidth * 2;
+  scene.add(meshf);
+
+  const meshfe = new THREE.Mesh(planeGeometry, planeMaterial);
+  meshfe.rotation.x = Math.PI / 2;
+  meshfe.position.x = mapWidth * 2;
+  scene.add(meshfe);
+
+  // LIGHT
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(0, 50, 0);
+  light.position.x = Math.PI * 0.5;
+  scene.add(light);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+
+  scene.background = new THREE.Color(0x73aff6);
+  animate();
+}
+
+function animate() {
+  controls.update();
+  renderer.render(scene, camera);
+
+  requestAnimationFrame(animate);
+}
+
+start();
