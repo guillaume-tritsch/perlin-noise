@@ -14,7 +14,16 @@ class WhiteWave {
     this.element.position.y = boat.position.y - 5;
 
     this.dep = 1.5;
-    this.dir = Math.random() <= 0.5;
+    let v = Math.random() 
+    if (v <= 0.25) {
+      this.dir = "l"
+    } else if (v <= 0.5) {
+      this.dir = "r"
+    } else if (v <= 0.75) {
+      this.dir = "f"
+    } else {
+      this.dir = "b"
+    }
     this.element.rotation.x = Math.random() * Math.PI;
     this.element.rotation.y = Math.random() * Math.PI;
     this.element.rotation.z = Math.random() * Math.PI;
@@ -28,10 +37,14 @@ class WhiteWave {
     this.element.scale.x += 0.01;
     this.element.scale.z += 0.01;
     this.element.scale.y += 0.01;
-    if (this.dir) {
+    if (this.dir === "l") {
       this.element.position.x += this.dep;
-    } else {
+    } else if (this.dir === "r") {
       this.element.position.x -= this.dep;
+    }else if (this.dir === "f") {
+      this.element.position.z += this.dep;
+    }else if (this.dir === "b") {
+      this.element.position.z -= this.dep;
     }
     this.dep /= 2;
   }
